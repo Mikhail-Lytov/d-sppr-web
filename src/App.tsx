@@ -1,35 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './layout/MainLayout';
+import ProcessUploadPage from './pages/ProcessUploadPage';
 
-function App() {
-  const [count, setCount] = useState(0)
+const DashboardPage = () => <div>Dashboard page</div>;
+const UserPage = ({ name }: { name: string }) => <div>User: {name}</div>;
+const FilesPage = () => <div>Files page</div>;
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+const App: React.FC = () => {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<MainLayout />}>
+                    {/* главная */}
+                    <Route index element={<DashboardPage />} />
 
-export default App
+
+                    {/* если тебе ещё нужен /process/parser, можно оставить и его */}
+                    <Route path="process/parser" element={<ProcessUploadPage />} />
+
+                    {/* другие страницы */}
+                    <Route path="files" element={<FilesPage />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    );
+};
+
+export default App;
