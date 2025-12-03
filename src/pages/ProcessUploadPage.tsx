@@ -9,28 +9,16 @@ const { Title, Text } = Typography;
 const ProcessUploadPage: React.FC = () => {
     const props: UploadProps = {
         name: 'file',
-        multiple: false,                         // один файл, если нужно несколько — поставь true
+        multiple: false,
         beforeUpload: (file) => {
-            // здесь можно проверить тип/размер файла
-            // например, только .json или .csv
-            // if (file.type !== 'application/json') { ... }
-
-            // ВАЖНО: возвращаем false, чтобы AntD не отправлял файл сам
-            // ты сам потом заберёшь file из onChange и отправишь на свой бек
-            return false;
-        },
-        onChange(info) {
-            const { status } = info.file;
-
-            // так как beforeUpload возвращает false, статус будет "done" только если ты сам поставишь
-            if (status !== 'uploading') {
-                console.log(info.file, info.fileList);
-            }
-            if (status === 'done') {
-                message.success(`${info.file.name} успешно загружен`);
-            } else if (status === 'error') {
-                message.error(`${info.file.name} не удалось загрузить`);
-            }
+            // валидация файла (тип/размер и т.д.)
+            // например:
+            // if (file.type !== 'application/json') {
+            //     message.error('Можно загружать только JSON');
+            //     return Upload.LIST_IGNORE;
+            // }
+            message.success(`Файл ${file.name} добавлен в очередь на загрузку`);
+            return false; // чтобы не загружать автоматически
         },
         onDrop(e) {
             console.log('Dropped files', e.dataTransfer.files);
@@ -38,28 +26,40 @@ const ProcessUploadPage: React.FC = () => {
     };
 
     return (
-        <Card>
-            <Title level={3} style={{ marginBottom: 16 }}>
-                Загрузка файла для обработки
-            </Title>
+        // ВАЖНО: контейнер подстраивается под flex-родителя из MainLayout
+        <div style={{ background: '#0D3447FF' }}>
+            <Card
+                title="Загрузка файла бизнес-процесса"
+                style={{ background: '#0D3447FF' }}
+            >
+                <div
+                    style={{
+                        maxWidth: 600,
+                        margin: '0 auto',
+                        width: '100%',
+                        background: '#0D3447FF'
+                    }}
+                >
+                    <Title level={4} style={{ textAlign: 'center', marginBottom: 24 }}>
+                        Загрузите файл для анализа
+                    </Title>
 
-            <Text type="secondary">
-                Выберите файл или перетащите его в область ниже. После выбора ты сможешь
-                отправить его на свой бекенд для обработки.
-            </Text>
+                    <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginBottom: 16 }}>
+                        Поддерживаем, например, JSON или CSV (валидацию можно донастроить).
+                    </Text>
 
-            <div style={{ marginTop: 24 }}>
-                <Dragger {...props} style={{ padding: 24 }}>
-                    <p className="ant-upload-drag-icon">
-                        <InboxOutlined />
-                    </p>
-                    <p className="ant-upload-text">Нажми или перетащи файл сюда</p>
-                    <p className="ant-upload-hint">
-                        Поддержка одиночной загрузки. Правила валидации можно прописать в beforeUpload.
-                    </p>
-                </Dragger>
-            </div>
-        </Card>
+                    <Dragger {...props} style={{ padding: 24  }}>
+                        <p className="ant-upload-drag-icon">
+                            <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">Нажми или перетащи файл сюда</p>
+                        <p className="ant-upload-hint">
+                            Поддерживается одиночная загрузка. Логику валидации можно настроить в beforeUpload.
+                        </p>
+                    </Dragger>
+                </div>
+            </Card>
+        </div>
     );
 };
 

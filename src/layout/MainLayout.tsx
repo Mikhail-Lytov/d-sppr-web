@@ -96,28 +96,28 @@ const MainLayout: React.FC = () => {
                 />
             </Sider>
 
-            <Layout>
+            <Layout style={{ background: '#0D3447FF' }}>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
                     <title>СППР</title>
                 </Header>
 
-                <Content style={{ margin: '0 16px' }}>
-                    <Breadcrumb style={{ margin: '16px 0' }} items={breadcrumbItems} />
+                <Content style={{ margin: '0 16px', background: '#0D3447FF' }}>
+                    <Breadcrumb style={{ margin: '16px 0', background: '#0D3447FF' }} items={breadcrumbItems} />
 
                     <div
                         style={{
                             padding: 24,                // вместо 240
                             background: colorBgContainer,
                             borderRadius: borderRadiusLG,
-                            minHeight: 360,             // можно вообще убрать
+                            minHeight: 360,
+                            background: '#0D3447FF',// можно вообще убрать
                         }}
                     >
                         <Outlet />
                     </div>
                 </Content>
 
-                <Footer style={{ textAlign: 'center' }}>
-                    Ant Design ©{new Date().getFullYear()} Created by Ant UED
+                <Footer style={{ textAlign: 'center', background: '#0D3447FF' }}>
                 </Footer>
             </Layout>
         </Layout>
