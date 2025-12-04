@@ -1,60 +1,55 @@
-import React from 'react';
-import { Upload, Typography, message, Card } from 'antd';
+import React from "react";
+import { Upload, Typography, message, Card } from "antd";
+import { InboxOutlined } from "@ant-design/icons";
 import type { UploadProps } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
+import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
+import { uploadProcessFile } from "../api/processUpload"; // <--- импорт внешнего сервиса
 
 const { Dragger } = Upload;
 const { Title, Text } = Typography;
 
 const ProcessUploadPage: React.FC = () => {
+
+    const customRequest = async (options: RcCustomRequestOptions) => {
+        const { file, onSuccess, onError } = options;
+
+        try {
+            const result = await uploadProcessFile(file as File);
+            onSuccess?.(result as any);
+        } catch (e) {
+            onError?.(e as any);
+        }
+    };
+
     const props: UploadProps = {
-        name: 'file',
+        name: "file",
         multiple: false,
-        beforeUpload: (file) => {
-            // валидация файла (тип/размер и т.д.)
-            // например:
-            // if (file.type !== 'application/json') {
-            //     message.error('Можно загружать только JSON');
-            //     return Upload.LIST_IGNORE;
-            // }
-            message.success(`Файл ${file.name} добавлен в очередь на загрузку`);
-            return false; // чтобы не загружать автоматически
-        },
-        onDrop(e) {
-            console.log('Dropped files', e.dataTransfer.files);
+        customRequest,
+        onChange(info) {
+            if (info.file.status === "done") {
+                message.success("Файл успешно загружен");
+            } else if (info.file.status === "error") {
+                message.error("Ошибка загрузки");
+            }
         },
     };
 
     return (
-        // ВАЖНО: контейнер подстраивается под flex-родителя из MainLayout
-        <div style={{ background: '#0D3447FF' }}>
-            <Card
-                title="Загрузка файла бизнес-процесса"
-                style={{ background: '#0D3447FF' }}
-            >
-                <div
-                    style={{
-                        maxWidth: 600,
-                        margin: '0 auto',
-                        width: '100%',
-                        background: '#0D3447FF'
-                    }}
-                >
-                    <Title level={4} style={{ textAlign: 'center', marginBottom: 24 }}>
-                        Загрузите файл для анализа
-                    </Title>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 40 }}>
+            <Card style={{ width: 600, background: "#001529", color: "white" }}>
+                <Title level={3} style={{ color: "white" }}>Загрузка файла бизнес-процесса</Title>
+                <Text style={{ color: "white" }}>Загрузи файл, который будет обработан на бэкенде</Text>
 
-                    <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginBottom: 16 }}>
-                        Поддерживаем, например, JSON или CSV (валидацию можно донастроить).
-                    </Text>
-
-                    <Dragger {...props} style={{ padding: 24  }}>
+                <div style={{ marginTop: 24 }}>
+                    <Dragger {...props}>
                         <p className="ant-upload-drag-icon">
                             <InboxOutlined />
                         </p>
-                        <p className="ant-upload-text">Нажми или перетащи файл сюда</p>
-                        <p className="ant-upload-hint">
-                            Поддерживается одиночная загрузка. Логику валидации можно настроить в beforeUpload.
+                        <p className="ant-upload-text" style={{ color: "white" }}>
+                            Нажми или перетащи файл сюда
+                        </p>
+                        <p className="ant-upload-hint" style={{ color: "white" }}>
+                            Поддерживается одиночная загрузка
                         </p>
                     </Dragger>
                 </div>

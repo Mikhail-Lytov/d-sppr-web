@@ -96,13 +96,13 @@ const MainLayout: React.FC = () => {
                 />
             </Sider>
 
-            <Layout style={{ background: '#0D3447FF' }}>
+            <Layout style={{ background: '#0D3447FF', color: 'white' }}>
                 <Header style={{ padding: 0, background: colorBgContainer }}>
                     <title>СППР</title>
                 </Header>
 
-                <Content style={{ margin: '0 16px', background: '#0D3447FF' }}>
-                    <Breadcrumb style={{ margin: '16px 0', background: '#0D3447FF' }} items={breadcrumbItems} />
+                <Content style={{ margin: '0 16px', background: '#0D3447FF', color: 'white' }}>
+                    <Breadcrumb style={{ margin: '16px 0', background: '#0D3447FF', color: 'white' }} items={breadcrumbItems} />
 
                     <div
                         style={{
@@ -111,13 +111,14 @@ const MainLayout: React.FC = () => {
                             borderRadius: borderRadiusLG,
                             minHeight: 360,
                             background: '#0D3447FF',// можно вообще убрать
+                            color: 'white'
                         }}
                     >
                         <Outlet />
                     </div>
                 </Content>
 
-                <Footer style={{ textAlign: 'center', background: '#0D3447FF' }}>
+                <Footer style={{ textAlign: 'center', background: '#0D3447FF', color: 'white' }}>
                 </Footer>
             </Layout>
         </Layout>
