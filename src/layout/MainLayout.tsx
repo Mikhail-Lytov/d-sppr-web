@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import {
-    DesktopOutlined,
     FileOutlined,
-    PieChartOutlined,
-    TeamOutlined,
-    UserOutlined,
     AreaChartOutlined,
     PlayCircleOutlined,
     SettingOutlined,
     BookOutlined,
     SafetyOutlined,
-    ExclamationCircleOutlined
+    ExclamationCircleOutlined,
+    WarningOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
@@ -43,7 +40,8 @@ const items: MenuItem[] = [
     ]),
     getItem('Настройки системы', 'settings/system', <SettingOutlined />, [
        getItem('Справочники', 'manual', <BookOutlined />, [
-           getItem('Типовые задачи', 'typical/task', <SafetyOutlined />)
+           getItem('Типовые задачи', 'typical/task', <SafetyOutlined />),
+           getItem('Справочник уязвимостей', 'typical/vulnerability', <WarningOutlined /> )
        ])
     ]),
     getItem('Files', '/files', <FileOutlined />),

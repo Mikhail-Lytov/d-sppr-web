@@ -3,9 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layout/MainLayout';
 import ProcessUploadPage from './pages/ProcessUploadPage';
 import BusinessOperationsPage from "./pages/BusinessOperationsPage.tsx";
+import VulnerabilityPage from "./pages/VulnerabilityPage"
 
 const DashboardPage = () => <div>Dashboard page</div>;
-const UserPage = ({ name }: { name: string }) => <div>User: {name}</div>;
 const FilesPage = () => <div>Files page</div>;
 
 const App: React.FC = () => {
@@ -25,6 +25,7 @@ const App: React.FC = () => {
                     <Route path="manual" element={<FilesPage/>}/>
 
                     <Route path="typical/task" element={<BusinessOperationsPage/>}/>
+                    <Route path="typical/vulnerability" element={<VulnerabilityPage/>}/>
                     {/* другие страницы */}
                     <Route path="files" element={<FilesPage />} />
                 </Route>
