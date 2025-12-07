@@ -9,11 +9,10 @@ import {
     Table,
     Typography,
     Space,
-    Tag,
     message,
 } from 'antd';
 
-import { fetchOperations } from "../api/vulnerabilityProcess"
+import { fetchOperations } from "../api/fileExternal"
 
 const { Title, Text } = Typography;
 
@@ -23,24 +22,24 @@ const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
 // ==== ТИПЫ ДАННЫХ И ОТВЕТА БЭКА ====
 
-interface VulnerabilityOperation {
+interface FileItem {
     id: string;
-    name: string;
-    description: string;
-    businessOperationName: string;
+    objectKey: string;
+    originalName: string;
+    contentType: string;
 }
 
 
 // Табличная строка = данные + key для Antd
-interface DataType extends VulnerabilityOperation {
+interface DataType extends FileItem {
     key: React.Key;
 }
 
 interface Item {
     id: string;
-    name: string;
-    description: string;
-    businessOperationName: string;
+    objectKey: string;
+    originalName: string;
+    contentType: string;
     key: string;
 }
 
@@ -146,7 +145,6 @@ const VulnerabilityPage: React.FC = () => {
         total: 0,
     });
 
-    const [count, setCount] = useState(0); // счётчик для локально добавляемых строк
 
     // Загрузка данных с бэка
     const loadData = async (page: number, pageSize: number) => {
@@ -178,11 +176,6 @@ const VulnerabilityPage: React.FC = () => {
         loadData(pagination.current, pagination.pageSize);
     }, []);
 
-    const handleDelete = (key: React.Key) => {
-        const newData = dataSource.filter((item) => item.key !== key);
-        setDataSource(newData);
-        // TODO: при необходимости дернуть DELETE на бэк
-    };
 
     const handleSave = (row: DataType) => {
         const newData = [...dataSource];
@@ -194,20 +187,6 @@ const VulnerabilityPage: React.FC = () => {
         });
         setDataSource(newData);
         // TODO: при необходимости отправить PATCH/PUT на бэк
-    };
-
-    const handleAdd = () => {
-        const newId = `temp-${count}`;
-        const newData: DataType = {
-            key: newId,
-            id: newId,
-            name: `Уязвимость ${count + 1}`,
-            description: "",
-            businessOperationName: "",
-        };
-        setDataSource([...dataSource, newData]);
-        setCount(count + 1);
-        // TODO: сюда можно добавить POST на бэк, чтобы создать запись
     };
 
     const defaultColumns: (ColumnTypes[number] & {
@@ -222,20 +201,20 @@ const VulnerabilityPage: React.FC = () => {
             ellipsis: true,
         },
         {
-            title: 'Имя',
-            dataIndex: 'name',
+            title: 'Имя файла',
+            dataIndex: 'originalName',
             editable: true,
             width: '30%',
         },
         {
-            title: 'Описание',
-            dataIndex: 'description',
+            title: 'Имя файла в системе',
+            dataIndex: 'objectKey',
             editable: true,
             ellipsis: true,
         },
         {
-            title: 'Бизнес операция',
-            dataIndex: 'businessOperationName',
+            title: 'Тип контента',
+            dataIndex: 'contentType',
             editable: true,
             ellipsis: true,
         },
@@ -244,16 +223,17 @@ const VulnerabilityPage: React.FC = () => {
             dataIndex: 'operation',
             width: '12%',
             align: 'center',
-            render: (_, record) =>
+            render: () =>
                 dataSource.length >= 1 ? (
                     <Popconfirm
                         title="Удалить строку?"
                         okText="Да"
                         cancelText="Нет"
-                        onConfirm={() => handleDelete(record.key)}
+                        onConfirm={() => {}}
+                        color="blue"
                     >
-                        <Button type="link" danger size="small">
-                            Удалить
+                        <Button type="link" danger size="small" color="blue">
+                            Скачать файл
                         </Button>
                     </Popconfirm>
                 ) : null,
@@ -313,19 +293,12 @@ const VulnerabilityPage: React.FC = () => {
                         >
                             <div>
                                 <Title level={3} style={{ marginBottom: 4 }}>
-                                    Типовые уязвимости
+                                    Файлы
                                 </Title>
                                 <Text type="secondary">
                                     Данные подгружаются с бэкенда. Можно редактировать значения в таблице.
                                 </Text>
                             </div>
-
-                            <Space>
-                                <Tag color="default">Черновик</Tag>
-                                <Button type="primary" onClick={handleAdd}>
-                                    Добавить строку
-                                </Button>
-                            </Space>
                         </div>
 
                         <Table<DataType>

@@ -4,9 +4,9 @@ import MainLayout from './layout/MainLayout';
 import ProcessUploadPage from './pages/ProcessUploadPage';
 import BusinessOperationsPage from "./pages/BusinessOperationsPage.tsx";
 import VulnerabilityPage from "./pages/VulnerabilityPage"
+import FilesPage from "./pages/FilesPage";
 
 const DashboardPage = () => <div>Dashboard page</div>;
-const FilesPage = () => <div>Files page</div>;
 
 const App: React.FC = () => {
     return (
