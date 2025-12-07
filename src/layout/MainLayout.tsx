@@ -6,7 +6,11 @@ import {
     TeamOutlined,
     UserOutlined,
     AreaChartOutlined,
-    PlayCircleOutlined
+    PlayCircleOutlined,
+    SettingOutlined,
+    BookOutlined,
+    SafetyOutlined,
+    ExclamationCircleOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
@@ -35,6 +39,12 @@ function getItem(
 const items: MenuItem[] = [
     getItem('СППР', 'process', <AreaChartOutlined />, [
         getItem('ПРОЦЕСС', '/process/parser', <PlayCircleOutlined />),
+        getItem("ОЦЕНКА УГРОЗ", "process/threat/assessment", <ExclamationCircleOutlined />)
+    ]),
+    getItem('Настройки системы', 'settings/system', <SettingOutlined />, [
+       getItem('Справочники', 'manual', <BookOutlined />, [
+           getItem('Типовые задачи', 'typical/task', <SafetyOutlined />)
+       ])
     ]),
     getItem('Files', '/files', <FileOutlined />),
 ];

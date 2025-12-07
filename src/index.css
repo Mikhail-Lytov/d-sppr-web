@@ -46,3 +46,16 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.editable-row:hover td {
+    background: #fafafa;
+}
+
+.editable-cell-value-wrap {
+    padding: 4px 8px;
+    transition: background-color 0.2s ease;
+}
+
+.editable-cell-value-wrap:hover {
+    background: #f0f5ff;
+    border-radius: 6px;
+}

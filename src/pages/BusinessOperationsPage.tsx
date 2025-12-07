@@ -1,0 +1,351 @@
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import type { GetRef, InputRef, TableProps } from 'antd';
+import {
+    Button,
+    Card,
+    Form,
+    Input,
+    Popconfirm,
+    Table,
+    Typography,
+    Space,
+    Tag,
+    message,
+} from 'antd';
+
+import { fetchOperations } from "../api/busunessOperations"
+
+const { Title, Text } = Typography;
+
+type FormInstance<T> = GetRef<typeof Form<T>>;
+
+const EditableContext = React.createContext<FormInstance<any> | null>(null);
+
+// ==== ТИПЫ ДАННЫХ И ОТВЕТА БЭКА ====
+
+interface BusinessOperation {
+    id: string;
+    name: string;
+    importance: number;
+}
+
+
+// Табличная строка = данные + key для Antd
+interface DataType extends BusinessOperation {
+    key: React.Key;
+}
+
+interface Item {
+    id: string;
+    name: string;
+    importance: number;
+    key: string;
+}
+
+interface EditableRowProps {
+    index: number;
+}
+
+// ==== ЗАПРОС НА ПОЛУЧЕНИЕ СПИСКА ОПЕРАЦИЙ ====
+
+
+// ==== РЕДАКТИРУЕМАЯ СТРОКА ====
+
+const EditableRow: React.FC<EditableRowProps> = ({ index, ...props }) => {
+    const [form] = Form.useForm();
+    return (
+        <Form form={form} component={false}>
+            <EditableContext.Provider value={form}>
+                <tr {...props} />
+            </EditableContext.Provider>
+        </Form>
+    );
+};
+
+interface EditableCellProps {
+    title: React.ReactNode;
+    editable: boolean;
+    dataIndex: keyof Item;
+    record: Item;
+    handleSave: (record: Item) => void;
+}
+
+const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
+                                                                                title,
+                                                                                editable,
+                                                                                children,
+                                                                                dataIndex,
+                                                                                record,
+                                                                                handleSave,
+                                                                                ...restProps
+                                                                            }) => {
+    const [editing, setEditing] = useState(false);
+    const inputRef = useRef<InputRef>(null);
+    const form = useContext(EditableContext)!;
+
+    useEffect(() => {
+        if (editing) {
+            inputRef.current?.focus();
+        }
+    }, [editing]);
+
+    const toggleEdit = () => {
+        setEditing(!editing);
+        form.setFieldsValue({ [dataIndex]: record[dataIndex] });
+    };
+
+    const save = async () => {
+        try {
+            const values = await form.validateFields();
+            toggleEdit();
+            handleSave({ ...record, ...values });
+        } catch (errInfo) {
+            console.log('Save failed:', errInfo);
+        }
+    };
+
+    let childNode = children;
+
+    if (editable) {
+        childNode = editing ? (
+            <Form.Item
+                style={{ margin: 0 }}
+                name={dataIndex}
+                rules={[{ required: true, message: `${title} is required.` }]}
+            >
+                <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+            </Form.Item>
+        ) : (
+            <div
+                className="editable-cell-value-wrap"
+                style={{ paddingInlineEnd: 24, cursor: 'pointer' }}
+                onClick={toggleEdit}
+            >
+                {children}
+            </div>
+        );
+    }
+
+    return <td {...restProps}>{childNode}</td>;
+};
+
+type ColumnTypes = Exclude<TableProps<DataType>['columns'], undefined>;
+
+// ==== СТРАНИЦА ====
+
+const BusinessOperationsPage: React.FC = () => {
+    const [dataSource, setDataSource] = useState<DataType[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // состояние пагинации Antd
+    const [pagination, setPagination] = useState({
+        current: 1,   // 1-based для Antd
+        pageSize: 10,
+        total: 0,
+    });
+
+    const [count, setCount] = useState(0); // счётчик для локально добавляемых строк
+
+    // Загрузка данных с бэка
+    const loadData = async (page: number, pageSize: number) => {
+        setLoading(true);
+        try {
+            const result = await fetchOperations(page - 1, pageSize); // бэк 0-based
+
+            const tableData: DataType[] = result.content.map((item) => ({
+                ...item,
+                key: item.id,
+            }));
+
+            setDataSource(tableData);
+            setPagination({
+                current: result.number + 1,
+                pageSize: result.size,
+                total: result.totalElements,
+            });
+        } catch (e) {
+            console.error(e);
+            message.error('Не удалось загрузить типовые операции');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // первый запрос при монтировании страницы
+    useEffect(() => {
+        loadData(pagination.current, pagination.pageSize);
+    }, []);
+
+    const handleDelete = (key: React.Key) => {
+        const newData = dataSource.filter((item) => item.key !== key);
+        setDataSource(newData);
+        // TODO: при необходимости дернуть DELETE на бэк
+    };
+
+    const handleSave = (row: DataType) => {
+        const newData = [...dataSource];
+        const index = newData.findIndex((item) => row.key === item.key);
+        const item = newData[index];
+        newData.splice(index, 1, {
+            ...item,
+            ...row,
+        });
+        setDataSource(newData);
+        // TODO: при необходимости отправить PATCH/PUT на бэк
+    };
+
+    const handleAdd = () => {
+        const newId = `temp-${count}`;
+        const newData: DataType = {
+            key: newId,
+            id: newId,
+            name: `Новая операция ${count + 1}`,
+            importance: 1,
+        };
+        setDataSource([...dataSource, newData]);
+        setCount(count + 1);
+        // TODO: сюда можно добавить POST на бэк, чтобы создать запись
+    };
+
+    const defaultColumns: (ColumnTypes[number] & {
+        editable?: boolean;
+        dataIndex: string;
+    })[] = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            width: '30%',
+            editable: true,
+            ellipsis: true,
+        },
+        {
+            title: 'Имя',
+            dataIndex: 'name',
+            editable: true,
+            width: '30%',
+        },
+        {
+            title: 'Важность',
+            dataIndex: 'importance',
+            editable: true,
+            ellipsis: true,
+        },
+        {
+            title: 'Действия',
+            dataIndex: 'operation',
+            width: '12%',
+            align: 'center',
+            render: (_, record) =>
+                dataSource.length >= 1 ? (
+                    <Popconfirm
+                        title="Удалить строку?"
+                        okText="Да"
+                        cancelText="Нет"
+                        onConfirm={() => handleDelete(record.key)}
+                    >
+                        <Button type="link" danger size="small">
+                            Удалить
+                        </Button>
+                    </Popconfirm>
+                ) : null,
+        },
+    ];
+
+    const columns = defaultColumns.map((col) => {
+        if (!col.editable) {
+            return col;
+        }
+        return {
+            ...col,
+            onCell: (record: DataType) => ({
+                record: record as Item,
+                editable: col.editable,
+                dataIndex: col.dataIndex as keyof Item,
+                title: col.title,
+                handleSave,
+            }),
+        };
+    });
+
+    const components = {
+        body: {
+            row: EditableRow,
+            cell: EditableCell,
+        },
+    };
+
+    return (
+        <div
+            style={{
+                minHeight: '100vh',
+                padding: '24px',
+                background: '#f5f5f5',
+                display: 'flex',
+                justifyContent: 'center',
+            }}
+        >
+            <div style={{ width: '100%', maxWidth: 1200 }}>
+                <Card
+                    bordered={false}
+                    style={{
+                        borderRadius: 16,
+                        boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
+                    }}
+                >
+                    <Space direction="vertical" style={{ width: '100%' }} size="large">
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                gap: 16,
+                                alignItems: 'flex-start',
+                                flexWrap: 'wrap',
+                            }}
+                        >
+                            <div>
+                                <Title level={3} style={{ marginBottom: 4 }}>
+                                    Типовые бизнес-операции
+                                </Title>
+                                <Text type="secondary">
+                                    Данные подгружаются с бэкенда. Можно редактировать значения в таблице.
+                                </Text>
+                            </div>
+
+                            <Space>
+                                <Tag color="default">Черновик</Tag>
+                                <Button type="primary" onClick={handleAdd}>
+                                    Добавить строку
+                                </Button>
+                            </Space>
+                        </div>
+
+                        <Table<DataType>
+                            components={components}
+                            rowClassName={() => 'editable-row'}
+                            bordered
+                            size="middle"
+                            dataSource={dataSource}
+                            columns={columns as ColumnTypes}
+                            loading={loading}
+                            pagination={{
+                                ...pagination,
+                                showSizeChanger: false,
+                                onChange: (current, pageSize) => {
+                                    setPagination((prev) => ({
+                                        ...prev,
+                                        current,
+                                        pageSize,
+                                    }));
+                                    loadData(current, pageSize);
+                                },
+                            }}
+                            scroll={{ x: 'max-content' }}
+                        />
+                    </Space>
+                </Card>
+            </div>
+        </div>
+    );
+};
+
+export default BusinessOperationsPage;
