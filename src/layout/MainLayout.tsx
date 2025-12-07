@@ -86,13 +86,14 @@ const MainLayout: React.FC = () => {
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <Sider
+                width={300}
                 collapsible
                 collapsed={collapsed}
                 onCollapse={(value) => setCollapsed(value)}
             >
                 <div className="logo">
                     <LogoIcon style={
-                        { width: collapsed ? 74 : 192  }
+                        { width: collapsed ? 80 : 280  }
                     } />
                 </div>
                 <Menu
