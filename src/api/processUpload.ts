@@ -31,8 +31,24 @@ export async function uploadProcessFile(file: File) {
         body: file,
     });
 
+    const requestTaskBody = {
+        fileId: presigned.fileId
+    }
+
+    // 3. создаём задачу на обработку
+    const responseTask = await fetch(`${API_URL}/primary-matrix/create`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestTaskBody),
+    });
+
     if (!uploadResp.ok) {
         throw new Error("Ошибка загрузки файла на presigned URL");
+    }
+    if (!responseTask.ok) {
+        throw new Error("Ошибка запуска задачи");
     }
 
 }
